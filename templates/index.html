@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--===============================================================================================-->
+    <link rel="icon" type="image/png" href="/static/images/icons/favicon.ico"/>
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css"
+          href="/static/vendor/bootstrap/css/bootstrap.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css"
+          href="/static/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css"
+          href="/static/vendor/animate/animate.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css"
+          href="/static/vendor/css-hamburgers/hamburgers.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css"
+          href="/static/vendor/select2/select2.min.css">
+    <!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <!--===============================================================================================-->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+
+
+</head>
+<body>
+{% include 'header.html' %}
+{% if current_user.role==1 %}
+    <div class="square">
+        <div class="content">
+            <div class="supercenter" style="flex:1 1 auto">
+                <button style="height: 100%;width:100%;"
+                        onclick="InitiateContract()">
+                    <img src="/static/images/add.png"
+                         alt="initiate new contract">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade text-center" id="draftContract">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Initiate a new contract</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="newContractForm" method="post"
+                          action="/newContract/">
+
+                        <label>Labor contract name:<input
+                                class="form-control"
+                                type="text"
+                                name="contractName"
+                                data-validate="contract name is required"
+                                placeholder="contractName"
+                                required></label>
+                        <div id="candidateList" class="dropdown-check-list"
+                             tabindex="100">
+
+                            <span class="anchor">Select Candidates</span>
+                            <ul class="items">
+                                {% for candidate in candidates %}
+                                    <li><input type="checkbox"
+                                               name="{{ candidate.username }}"/>{{ candidate.name }}({{ candidate.email }})
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <strong id="uploading"></strong>
+                    <input type="submit" class="btn btn-primary"
+                           form="newContractForm"
+                           id="btnUpload" value="Submit">
+                    <button type="button" class="btn btn-secondary"
+                            data-dismiss="modal">Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+<div class="modal fade text-center " id="Signing">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <strong id="SigningMessage">Please wait while we retrieve your
+                    signing link</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% if current_user.role==1 %}
+    <div class="modal fade text-center" id="editContractModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="editForm">
+                    <div class="modal-header">
+                        <label>Labor contract name:<input
+                                class="form-control"
+                                type="text"
+                                name="contractName"
+                                data-validate="contract name is required"
+                                placeholder="contractName"
+                                id="editContractTitle"
+                                required></label>
+                        <input type="text" name="uuid" id="hiddenEditUUID"
+                               hidden required>
+                    </div>
+                    <div class="modal-body">
+
+                        <div id="editor">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="submit" class="btn btn-primary"
+                               id="btnUpload" value="Submit">
+                        <button type="button" class="btn btn-secondary"
+                                data-dismiss="modal">Close
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div class="modal" id="viewmodal">
+    <img class="back-icon" src="/static/images/back-arrow.jpg" alt="Go back"
+         id="back-icon" onclick="CloseView()">
+    <div id="adobe-view"
+         class="pdf-viewer modal-content col-12 viewercontent"></div>
+</div>
+<!-- Embedded pdf viewer -->
+{% for contract in contracts %}
+    <div class="square">
+        <div class="content">
+
+            <!--title-->
+            <div style="flex: 0 1 auto">
+                <strong>{{ contract.title }}</strong>
+                <strong class="pull-right">Company:{{ contract.company }}</strong>
+                <hr class="thickhr">
+                <strong>{{ statusEncoding[contract.status] }}</strong>
+                <br>
+                {% if contract.related|length > 0 %}
+                    Candidate:
+                    {% for candidate in contract.related %}
+                        {% if loop.index0 != 0 %}
+                            ,
+                        {% endif %}
+                        {{ candidate.username }}({{ candidate.name }})
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!--content-->
+            <div style="flex:1 1 auto" class="supercenter">
+                <div>
+                    <button class="btn btn-info"
+                            onclick="RenderPDF('{{ contract.uuid }}')">
+                        View Content
+                    </button>
+
+                    {% if current_user.role==1 and contract.status==1 %}
+                        <button class="btn btn-info"
+                                onclick="EditPDF('{{ contract.uuid }}')">
+                            Edit Content
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+
+
+            <!--actions-->
+            {% if (current_user.role==1 and contract.status>=1 and contract.signStatus<2) or (current_user.role==2 and contract.status>=2 and (contract.signStatus==0 or contract.signStatus==2) and contract.draftStatus==2) %}
+                <div style="flex: 0 1 auto">
+                    <hr class="thickhr">
+                    <br>
+                    {% if current_user.role==1 %}
+                        {% if contract.status==1 %}
+                            {% if contract.draftStatus == 1 %}
+                                <button class="btn btn-success pull-left w-50"
+                                        onclick="contractOperationWithoutSigning('{{ contract.uuid }}','copy');">
+                                    Send copy
+                                </button>
+                            {% elif contract.draftStatus == 2 %}
+                                <button class="btn btn-success pull-left w-50"
+                                        onclick="contractOperationWithoutSigning('{{ contract.uuid }}','finalize');">
+                                    Finalize
+                                </button>
+                            {% endif %}
+                            <button class="btn btn-danger pull-right w-50"
+                                    onclick="contractOperationWithoutSigning('{{ contract.uuid }}','delete')">
+                                Delete
+                            </button>
+
+                        {% endif %}
+                        {% if contract.status==2 or contract.status ==3 %}
+                            <button class="btn btn-success w-100"
+                                    onclick="contractOperationWithoutSigning('{{ contract.uuid }}','approve')">
+                                Approve
+                            </button>
+                        {% endif %}
+                        {% if contract.status==4 %}
+                            <button class="btn btn-danger w-100"
+                                    onclick="contractOperationWithoutSigning('{{ contract.uuid }}','disapprove')">
+                                Disapprove
+                            </button>
+                        {% endif %}
+                        {% if contract.status==5 and (contract.signStatus ==0 or contract.signStatus==1) %}
+                            <button class="btn btn-success pull-left w-50"
+                                    onclick="contractOperation('{{ contract.uuid }}','sign')">
+                                Sign
+                            </button>
+                            <button class="btn btn-danger pull-right w-50"
+                                    onclick="contractOperationWithoutSigning('{{ contract.uuid }}','disapprove')">
+                                Disapprove
+                            </button>
+                        {% endif %}
+                    {% elif current_user.role==2 %}
+                        {% if contract.status==2 or contract.status ==4 %}
+                            <button class="btn btn-success w-100"
+                                    onclick="contractOperationWithoutSigning('{{ contract.uuid }}','approve')">
+                                Approve
+                            </button>
+                        {% endif %}
+                        {% if contract.status==3 %}
+                            <button class="btn btn-danger w-100"
+                                    onclick="contractOperationWithoutSigning('{{ contract.uuid }}','disapprove')">
+                                Disapprove
+                            </button>
+                        {% endif %}
+                        {% if contract.status==5 and (contract.signStatus ==0 or contract.signStatus==2) %}
+                            <button class="btn btn-success pull-left w-50"
+                                    onclick="contractOperation('{{ contract.uuid }}','sign')">
+                                Sign
+                            </button>
+                            <button class="btn btn-danger pull-right w-50"
+                                    onclick="contractOperationWithoutSigning('{{ contract.uuid }}','disapprove')">
+                                Disapprove
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+{% endfor %}
+<div class="alert alert-danger invisible" role="alert" id="myAlert">
+    <a href="#" class="close" data-dismiss="alert">&times;</a>
+    <strong id="alert"></strong>
+</div>
+<div class="footer">
+</div>
+</body>
+<!--===============================================================================================-->
+<script src="/static/vendor/jquery/jquery-3.3.1.slim.min.js"></script>
+<script
+        src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+        crossorigin="anonymous"></script>
+<!--===============================================================================================-->
+<script src="/static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<script>
+    var quill = new Quill('#editor', {
+        theme: 'snow'
+    });
+    $('#myAlert').hide()
+    $('#myAlert').removeClass("invisible")
+    var checkList = document.getElementById('candidateList');
+    if (checkList) {
+        checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
+            if (checkList.classList.contains('visible'))
+                checkList.classList.remove('visible');
+            else
+                checkList.classList.add('visible');
+        }
+    }
+
+    function InitiateContract() {
+        $('#draftContract').modal("show")
+    }
+
+    $('#newContractForm').submit(function (event) {
+        event.preventDefault();
+        var myForm = document.getElementById('newContractForm'); // get information filled in form
+        var formData = new FormData(myForm);
+        var contractName = formData.get('contractName'); //get contractName
+
+        var newformData = new FormData(); //prepare data for sending off
+        newformData.append('contractName', contractName)
+        for (var pair of formData.entries()) {
+            if (pair[0] !== 'contractName') {
+                newformData.append('candidateList[]', pair[0].toString()) //push all selected candidates to list
+            }
+        }
+
+        $.ajax({
+            url: '/newContract/',
+            type: 'POST',
+            data: newformData,
+            processData: false,
+            contentType: false,
+            success: function (responds) {
+                window.location.href = '/';
+            },
+        })
+    });
+
+    $('#editForm').submit(function (event) {
+        event.preventDefault();
+        $('#editContractModal').modal('hide')
+        showBlock("uploading edited document..")
+        var editedHTML = quill.root.innerHTML;
+        var editedTitle = $('#editContractTitle').val();
+        var uuid = $('#hiddenEditUUID').val()
+
+        var newformData = new FormData(); //prepare data for sending off
+        newformData.append('contractName', editedTitle)
+        newformData.append('content', editedHTML)
+        newformData.append('contractuuid', uuid)
+
+        $.ajax({
+            url: '/edit/',
+            type: 'POST',
+            data: newformData,
+            processData: false,
+            contentType: false,
+            success: function (responds) {
+                hideBlock()
+                window.location.href = '/';
+            },
+        })
+    });
+
+
+    $('#myAlert').on('closed.bs.alert', function () {
+        $('#alert').text("")
+    })
+
+    function alert(string) {
+        $('#alert').text(string)
+        $('#myAlert').show()
+    }
+
+    function showBlock(string) {
+        document.getElementById('SigningMessage').innerText = string
+        $('#Signing').modal({backdrop: 'static', keyboard: false})
+        $('#Signing').modal('show')
+    }
+
+    function hideBlock() {
+        $('#Signing').modal('hide')
+    }
+
+
+    async function contractOperationWithoutSigning(uuid, operation) {
+        var formData = new FormData();
+        formData.append('contractuuid', uuid);
+        showBlock(operation + "ing...")
+        $.ajax({
+            url: '/' + operation + '/',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: async function (responds) {
+                window.location.href = '/';
+                hideBlock()
+            },
+            error: function (responds) {
+                hideBlock()
+            }
+        })
+    }
+
+
+    async function contractOperation(uuid, operation) {
+        var formData = new FormData();
+        formData.append('contractuuid', uuid);
+        showBlock("Please wait while we retrieve your signing link")
+        $.ajax({
+            url: '/' + operation + '/',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: async function (responds) {
+                var dict = responds
+                var agreement = dict['agreement']
+                var win2 = window.open(dict['url'])
+                var agreementStatus = ''
+
+                var formData = new FormData()
+                formData.append('agreement', agreement)
+                formData.append('contractuuid', uuid)
+                showBlock("Please Sign the Document on the new tab.")
+                var cte = 0;
+                var idlecte = 0;
+                while (agreementStatus !== "SIGNED" && cte <= 3 && idlecte < 600) {
+                    //check status
+                    $.ajax({
+                        url: '/' + operation + '/',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (responds) {
+                            var dict = responds
+                            agreementStatus = dict['status']
+                        }
+                    })
+                    if (win2.closed) {
+                        cte += 1;
+                    }
+                    idlecte += 1;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+
+                hideBlock()
+                if (agreementStatus === "SIGNED") {
+                    window.location.replace('/');
+                } else {
+                    if (idlecte > 1000) {
+                        showBlock("you waited too long, sign is cancelled, please refresh the page to continue")
+                    } else {
+                        showBlock("signing failed, please try again")
+                        await new Promise(r => setTimeout(r, 3000));
+                        hideBlock()
+                    }
+                }
+            },
+            error: async function (responds) {
+                showBlock(responds.responseText)
+                await new Promise(r => setTimeout(r, 3000));
+                hideBlock()
+            }
+        })
+    }
+
+
+    var adobeDCView; //cache of the div which contains the pdf viewer
+    var currentPreview; //cache for the current pdf promise.
+    var currentPDFuuid; //cache for the current pdf uuid
+    var updateTimer;//timer for retriggering the comment update.
+    var updatingops = 0;
+    var updating = false;
+    var currentAnnotations = {};
+    var currentModified = 0;
+
+    //config for the pdf viewer.
+    const config = {
+        embedMode: "FULL_WINDOW",
+        defaultViewMode: "FIT_WIDTH",
+        showAnnotationTools: true,
+        showLeftHandPanel: true,
+        dockPageControls: true,
+        showPageControls: true,
+        enableAnnotationAPIs: true,
+        includePDFAnnotations: true
+    };
+
+    //callback profile for pdf viewer
+    const profile = {
+        userProfile: {
+            name: '{{ current_user.username }}',
+            email: '{{ current_user.email }}',
+        }
+    };
+
+    /**
+     * checks if the given pdf can be found in the server, if it can be found, load the pdf with the comments along.
+     * @param uuid,
+     * @param title
+     */
+    function RenderPDF(uuid) {
+        document.getElementById("back-icon").style.zIndex = "0"; //move the back-icon to background until the loading is done for better immersion.
+
+        adobeDCView = new AdobeDC.View({
+            clientId: '{{AdobeID}}',
+            divId: 'adobe-view'
+        });
+
+        var data = {'contractuuid': uuid}; //preparing data json for the query.
+        $.ajax({
+            url: '/view/',
+            type: 'post',
+            data: data,
+            success: function (responds) {
+                //load the user profile.
+                var title = responds['title']
+                currentAnnotations = {}
+                currentModified = responds['modified']
+
+                adobeDCView.registerCallback(
+                    AdobeDC.View.Enum.CallbackType.GET_USER_PROFILE_API,
+                    function () {
+                        return new Promise((resolve, reject) => {
+                            resolve({
+                                code: AdobeDC.View.Enum.ApiResponseCode.SUCCESS,
+                                data: profile
+                            })
+                        })
+                    });
+
+                //load the pdf file
+                currentPreview = adobeDCView.previewFile(
+                    {
+                        content: {location: {url: '/view/?contractuuid=' + uuid}},
+                        metaData: {fileName: title, id: uuid},
+                    }, config);
+
+                //if any comment exists, load comments.
+                if (Object.keys(responds['data']).length > 0) {
+                    /* Use the annotation manager interface to invoke the commenting APIs*/
+                    currentAnnotations = responds['data']
+                    var annotations = $.map(currentAnnotations, function (value, key) {
+                        return value
+                    });
+                    currentPreview.then(function (adobeViewer) {
+                        adobeViewer.getAnnotationManager().then(function (annotationManager) {
+                            /* API to add annotations to PDF and return the updated PDF buffer */
+                            /* These APIs will work only when includePDFAnnotations is set to true in viewerConfig */
+                            annotationManager.addAnnotations(annotations)
+                                .then(function (result) {
+                                })
+                                .catch(function (error) {
+                                    console.log(error.message)
+                                });
+                        });
+                    });
+                }
+
+                //register callback for events to be sent to GA.
+                adobeDCView.registerCallback(AdobeDC.View.Enum.CallbackType.EVENT_LISTENER, function (event) {
+                        switch (event.type) {
+                            case "APP_RENDERING_DONE":
+                                document.getElementById("back-icon").style.zIndex = "999"; //move the back-icon to the front whenever the loading is done.
+                                RegisterCallback();
+                                break;
+                        }
+                    },
+                    {
+                        enablePDFAnalytics: true,
+                        enableAnnotationEvents: true
+                    });
+
+                //store the current pdf's information
+                currentPDFuuid = uuid;
+                //start repeating the updating loop.
+                clearTimeout(updateTimer);
+                updateTimer = setTimeout(function () {
+                    CheckNewCommentsAndPDF();
+                }, {{ UpdateInterval }});
+
+                //display the pdf element as a modal(hidden when not used, and when used it will be full-screen).
+                $('#viewmodal').modal('show')
+            },
+            error: function (res) {
+                console.log(res.responseText);
+            }
+        });
+    }
+
+
+    function EditPDF(uuid) {
+        var data = {'contractuuid': uuid}; //preparing data json for the query.
+        $.ajax({
+            url: '/view/',
+            type: 'post',
+            data: data,
+            success: function (responds) {
+                var title = responds['title']
+                var html = responds['html']
+                quill.clipboard.dangerouslyPasteHTML(0, html);
+                $('#editContractTitle').val(title)
+                $('#hiddenEditUUID').val(uuid)
+                $('#editContractModal').modal('show')
+            }
+        })
+    }
+
+
+    function CloseView() {
+        clearTimeout(updateTimer);
+        $('#viewmodal').modal('hide');//hide the pdf.
+        currentPDFuuid = null;
+        //clear the update comment timer
+    }
+
+    var uploadingAnnotation = null; //cache for the annotation currently uploading, we'll ignore the current uploading annotations when updating the new comments.
+
+    /**
+     * a function which tries uploads the annotation to the server
+     * @param event
+     **/
+    function UploadAnnotation(event) {
+        uploadingAnnotation = event['data'];//store the annotation.
+        var tmp = JSON.stringify(event['data']);
+        $.ajax({
+            url: '/annotation/',
+            type: 'post',
+            data: tmp,
+            contentType: 'application/json',
+            success: function (responds) {
+                uploadingAnnotation = null;//reset the annotation
+            },
+            error: function (res) {
+                uploadingAnnotation = null;//reset the annotation
+                console.log(res.responseText);
+                CheckNewCommentsAndPDF(true);//check immediately for new comments to ensure seamless experience.
+            }
+        });
+    }
+
+    /**
+     * a function which tries to retrieve cnew comments from the server, it loops itself infinitely based on an interval.
+     * @param oneTime: if the function should repeat itself.
+     **/
+    function CheckNewCommentsAndPDF(oneTime = false) {
+        var data = {'contractuuid': currentPDFuuid}; //prepare the data package.
+
+        if (!oneTime) {
+            //setup the timer for the next check.
+            clearTimeout(updateTimer);
+            updateTimer = setTimeout(function () {
+                CheckNewCommentsAndPDF();
+            }, {{ UpdateInterval }});
+        }
+
+        $.ajax({
+            url: '/view/',
+            type: 'post',
+            data: data,
+            success: function (responds) {
+                UpdateCurrentAnnotationsAndPDF(responds);
+            },
+            error: function (res) {
+                console.log(res.responseText);
+            }
+        });
+    }
+
+
+    function UpdateCurrentAnnotationsAndPDF(responds) {
+        //check the current view to see if annotation exists.
+        /* Use the annotation manager interface to invoke the commenting APIs*/
+        if (updating) {
+            return
+        }
+        if (currentModified < responds['modified']) {
+            RenderPDF(currentPDFuuid)
+        }
+
+        currentPreview.then(function (adobeViewer) {
+            adobeViewer.getAnnotationManager().then(function (annotationManager) {
+                annotationManager.getAnnotations()// get all the annotations currently in the pdf
+                    .then(result => {
+                        if (!updating) {
+                            updating = true
+                        } else {
+                            return
+                        }
+                        currentAnnotations = {};
+                        var localcopy = {};
+                        for (var localannoIndex in result) {
+                            var localAnno = result[localannoIndex]
+                            currentAnnotations[localAnno['id']] = localAnno;
+                            localcopy[localAnno['id']] = localAnno;
+                        }
+                        var adding = [];
+                        //check and add the server annotations which we couldn't find a match in the local pdf.
+                        for (var key in responds['data']) {
+                            var serverAnno = responds['data'][key]
+                            var serverAnnoid = serverAnno['id']
+                            //if it's a annotation currently being uploaded (weird but just in case), ignore it
+
+                            if (uploadingAnnotation !== null) {
+                                if (uploadingAnnotation['id'] === serverAnnoid) {
+                                    continue;
+                                }
+                            }
+
+                            if (serverAnnoid in localcopy) {
+                                var localAnno = localcopy[serverAnnoid]
+                                delete localcopy[serverAnnoid]
+                                if (serverAnno['modified'] > localAnno['modified']) {
+                                    currentAnnotations[serverAnnoid] = serverAnno;
+                                    annotationManager.updateAnnotation(serverAnno)
+                                        .then(function (result) {
+                                            console.log(result)
+                                        })
+                                        .catch(function (error) {
+                                        });
+
+                                }
+
+                            } else {
+                                serverAnno['target']['test'] = true;
+                                adding.push(serverAnno)
+                            }
+                        }
+
+
+                        if (Object.keys(adding).length > 0) {
+                            for (var annoindex in adding) {
+                                var anno = adding[annoindex]
+                                currentAnnotations[anno['id']] = anno
+                            }
+                            annotationManager.addAnnotations(adding) // add the server annotation to current pdf.
+                                .then(function (result) {
+                                    console.log(result)
+                                })
+                                .catch(function (error) {
+                                    console.log(error.message)
+                                });
+                        }
+
+                        var deleting = []
+                        for (var key in localcopy) {
+                            if (uploadingAnnotation !== null) {
+                                if (uploadingAnnotation['id'] === key) {
+                                    continue;
+                                }
+                            }
+                            deleting.push(key);
+                        }
+                        if (Object.keys(deleting).length > 0) {
+                            for (var annoindex in deleting) {
+                                var annoid = deleting[annoindex]
+                                delete currentAnnotations[annoid]
+                            }
+                            annotationManager.deleteAnnotations({annotationIds: deleting}) // add the server annotation to current pdf.
+                                .then(function (result) {
+                                })
+                                .catch(function (error) {
+                                    console.log(error.message)
+                                });
+                        }
+                        updating = false;
+                    })
+            });
+        });
+    }
+
+
+    function RegisterCallback() {
+        //register callback for events to be sent to GA.
+        adobeDCView.registerCallback(AdobeDC.View.Enum.CallbackType.EVENT_LISTENER, function (event) {
+                switch (event.type) {
+                    case "APP_RENDERING_DONE":
+                        document.getElementById("back-icon").style.zIndex = "999"; //move the back-icon to the front whenever the loading is done.
+                        break;
+
+                    // 3 cases for the annotations, if they're not customly tagged, try to upload them to the server.
+                    case "ANNOTATION_ADDED":
+                        if (event['data']['creator']['id'] !== 'computer') {
+                            if (event['data']['creator']['name'] === '{{ current_user.username }}') {
+                                event['data']['belongsToPDF'] = currentPDFuuid;
+                                currentAnnotations[event['data']['id']] = event['data'];
+                                UploadAnnotation(event);
+                            } else {
+                                //if the user tried to delete/update a comment/annotation of someone else. check for new comment immediately to ensure seamless experience.
+                                CheckNewCommentsAndPDF(true)
+                            }
+                        }
+                        break;
+                    case "ANNOTATION_UPDATED":
+                        if (event['data']['creator']['id'] !== 'computer') {
+                            if (event['data']['creator']['name'] === '{{ current_user.username }}') {
+                                event['data']['belongsToPDF'] = currentPDFuuid;
+                                currentAnnotations[event['data']['id']] = event['data'];
+                                UploadAnnotation(event);
+                            } else {
+                                //if the user tried to delete/update a comment/annotation of someone else. check for new comment immediately to ensure seamless experience.
+                                CheckNewCommentsAndPDF(true)
+                            }
+                        }
+                        break;
+                    case "ANNOTATION_DELETED":
+                        if (event['data']['creator']['id'] !== 'computer') {
+                            if (event['data']['creator']['name'] === '{{ current_user.username }}') {
+                                event['data']['belongsToPDF'] = currentPDFuuid;
+                                event['data']['deleting'] = "Y";
+                                delete currentAnnotations[event['data']['id']];
+                                UploadAnnotation(event);
+                            } else {
+                                //if the user tried to delete/update a comment/annotation of someone else. check for new comment immediately to ensure seamless experience.
+                                CheckNewCommentsAndPDF(true)
+                            }
+                        }
+                        break;
+                }
+            },
+            {
+                enablePDFAnalytics: true,
+                enableAnnotationEvents: true
+            });
+    }
+</script>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!--I don't know if i'm allowed to change this. so ill leave it open here -->
+    <title>Sign Up Form by Colorlib</title>
+
+    <!-- Font Icon -->
+    <link rel="stylesheet"
+          href="/static/fonts/material-icon/css/material-design-iconic-font.min.css">
+
+    <!-- Main css -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="main">
+    <div class="container">
+        <form method="POST" class="register-form" id="register-form">
+            <h2>Sign up your account</h2>
+            {% if current_user.is_authenticated %}
+                <h2>Hi {{ current_user.name }}!</h2>
+            {% endif %}
+            <div class="form-group-1">
+                <input type="text" name="username" id="username"
+                       placeholder="Username"
+                       required/>
+                <input class="hidden" type="text" name="name" id="name"
+                       placeholder="Your Name" required/>
+                <input type="email" name="email" id="email" placeholder="Email"
+                       required/>
+                <input type="password" name="password" id="password"
+                       placeholder="Your Password" required/>
+                <input type="password" id="confirm_password"
+                       placeholder="Confirm password" required/>
+                <input type="text" name="company" id="company"
+                       placeholder="Related Company" required/>
+                <div class="select-list">
+                    <select name="role_type" id="role_type">
+                        <option value="0" id="role_selection">Role</option>
+                        <option value="1">Company</option>
+                        <option value="2">Candidate</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" name="agree-term" id="agree-term"
+                       class="agree-term"/>
+                <label for="agree-term"
+                       class="label-agree-term"><span><span></span></span>I
+                    agree to the <a
+                            class="term-service">Terms and
+                        Conditions</a></label>
+            </div>
+            <div class="form-submit">
+                <input type="submit" name="submit" id="submit" class="submit"
+                       value="Register"/>
+            </div>
+            <h3 id="message"></h3>
+        </form>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="/static/vendor/jquery/jquery.min.js"></script>
+<script src="/static/js/register.js"></script>
+<script>
+
+    var password = document.getElementById("password")
+        , confirm_password = document.getElementById("confirm_password");
+
+    function validatePassword() {
+        if (password.value != confirm_password.value) {
+            confirm_password.setCustomValidity("Passwords Don't Match");
+        } else {
+            confirm_password.setCustomValidity('');
+        }
+    }
+
+    password.onchange = validatePassword;
+    confirm_password.onkeyup = validatePassword;
+
+    $('.register-form').on('submit', function (e) {
+        $('#message').text(''); //reset the warn message
+
+        var data = $(this).serializeArray(); // convert form to array
+        var err = false;
+        if (!$('#agree-term').is(":checked")) { //if it's not checked, then propmt an error
+            $('#message').text('Please accept the terms!');
+            err = true;
+        }
+        if (document.getElementsByClassName('role-selected').length === 0) { //same for the role selection
+            $('#message').text('Please select a role!');
+            err = true
+        }
+
+        if (!err) {
+            data.push({
+                name: "role",
+                value: document.getElementsByClassName('role-selected')[0].getAttribute('value')
+            }); //add the selected role to the data array.
+
+            $.ajax({
+                url: '/register/',
+                type: 'post',
+                data: data,
+                success: function (responds) {
+                    //if success,
+                    $('#message').text('Succesfully registered! Redirecting to home page...'); //the server will only respond 200 if success.
+                    setTimeout(function () {
+                        window.location.href = "/";
+                    }, 2000)
+                },
+                error: function (res) {
+                    $('#message').text(res.responseText);
+                }
+            });
+        }
+        e.preventDefault();
+    });
+
+
+</script>
+</body><!-- This templates was made by Colorlib (https://colorlib.com) -->
+</html>

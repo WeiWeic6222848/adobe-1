@@ -1,5 +1,5 @@
 Config = {
-    "AdobeClientID": "7782d1a933e1428bb5a27a9970f511be",
+    "AdobeClientID": "a8678ff8543f474393bf46433dcb450d",
     "AdobeSignID": "CBJCHBCAABAATuR_b-G58wkm_1KPNbqnUN6nc24sRbFZ",
     "AdobeSignSecret": "LQ_AaBJlfVgV45VnvNil9mzI7lTY_2ji",
     "DeploymentURL": "adobe-usercase.herokuapp.com",

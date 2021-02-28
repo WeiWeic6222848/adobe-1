@@ -469,6 +469,12 @@ def newContractCall(contractName, candidateList, current_user):
         contract = Contract(contractName, current_user.company,
                             foundcandidates, contractsFilename)
         contract.uuid = str(uuid.uuid3(uuid.NAMESPACE_DNS, uuidIdentifier))
+
+        if len(foundcandidates) <= 1:
+            contract.draftStatus = DraftStatus.IndividualDraft.value
+            for candidate in foundcandidates:
+                candidate.addContract(contract.uuid)
+
         contractDB[contract.uuid] = contract
 
         # store to company table

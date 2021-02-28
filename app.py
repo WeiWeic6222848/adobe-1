@@ -404,7 +404,7 @@ def signComplete():
 @login_required
 def index():
     contracts = getAvailableContracts()
-    if len(contracts)>0:
+    if len(contracts) > 0:
         contracts.sort(key=lambda x: x.status)
     candidates = companyUsers.get(current_user.company, [])
     candidates = [i for i in candidates if i.role == 2]
@@ -732,6 +732,7 @@ def signContract():
                         contract.signStatus)
                     if contract.signStatus == SignStatus.Signed.value:
                         contract.status = ContractStatus.Signed.value
+                    contract.modified = datetime.now()
         return {'status': agreementStatus}, 200
 
 

@@ -4,9 +4,9 @@ Config = {
     "AdobeSignSecret": "LQ_AaBJlfVgV45VnvNil9mzI7lTY_2ji",
     "DeploymentURL": "localhost:8080",
     "ShardLocation": "eu2",
-    'UpdateInterval': 2000,
     "FlaskSecret": "0QK7SG[NEfVCBsemC$%3qQ.l^*(lB2JsT(*c;npx6dzm,fz,''"
                    "ioHOD]`dhkO,Ibd",
+    'UpdateInterval': 2000,
     "AdminAccessToken": "3AAABLblqZhCNbIJqoXeoftJz9MXK"
                         "w2ZI_bz4LheQXvE7RfDk6hYolZCmk"
                         "zsnEmXbJXbWpmtT1MPBJo4V699WSdIzwpBTnotf",

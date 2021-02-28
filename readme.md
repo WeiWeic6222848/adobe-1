@@ -95,6 +95,17 @@ The ShardLocation can vary depending on the location of your adobe account, if y
     "ShardLocation": "eu2",
 ```
 
+UpdateInterval of annotations and contract editing can be configured in the config file
+```
+    "UpdateInterval" : 2000
+```
+It is in millisecond: 2000 -> check for update every 2 second.
+Setting it too low might cause some unexpected behavior, 1 second is the minimum I recommend.
+
+The admin refresh token and admin access token is an optional but strongly recommended configuration, 
+as it skips the authentication procedure at the startup of the program.
+I provided mine temporarily. you can change it to your own.
+
 ##pdf_creator
 
 inside the folder `pdf_creator`:
@@ -139,15 +150,33 @@ After you gave access to the program (for your account). The website will be dep
 
 - In the common editing state, the candidate wouldn't be able to see the contract, they can only see it after the company user decided to send copies.
 
-- If a contract is initialized with one candidate
+- If a contract is initialized with one candidate, the send copy option will be skipped, the candidate will be able to view the editing process from the beginning
 
-- each pdf will have a view content button, student will have a edit, submit and delete for draft pdf and professor have approve and reject for submitted pdf.
+- seamless annotation update and pdf update is implemented
 
-- pdf editing is not implemented due to time restriction.
+- tag is not implemented as the copilot said it is ok
 
-- When a user try to submit/approve/reject, the program will upload and create agreement for user to sign, after the agreement is signed the website will update.
+- candidate and company can approve, sign, dissaprove contract after finalization
 
-- Professor can give reason when approving/rejecting.
+- annotations are removed after finalization
+
+- cancel is not implemented as it is not mentioned anywhere in the forum nor requirement
+
+- when signing, user is going to be taken to a new tab to sign.
+
+- there can only be one person signing one document at the same time.
+
+- a minimum responsible interface is implemented
+
+##HIGHLIGHTS
+- for both login and index page, the lighthouse score is above 90 consistently
+
+- seamless annotation and pdf refreshing with configurable interval
+
+- signed document can be viewed directly
+
+- signed document will keep it's signature even if the other party disapproves and approves several times, as required
+
 
 **PDF TOOL USAGE:**
 - PDF tool is used to transform static html to pdf.

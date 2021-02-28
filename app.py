@@ -596,6 +596,7 @@ def copyContract():
             newcontract.signStatus = contract.signStatus
             newcontract.status = contract.status
             newcontract.draftStatus = DraftStatus.IndividualDraft.value
+            newcontract.htmlData = contract.htmlData
 
             # assign new contract to company user and candidate
             newcontract.uuid = str(uuid.uuid3(uuid.NAMESPACE_DNS, location))
@@ -753,7 +754,8 @@ def viewContract():
                             'data': annotations,
                             'title': contract.title,
                             'html': contract.htmlData,
-                            'modified': contract.modified}
+                            'modified': contract.modified,
+                            'status': contract.status}
     return 'cannot found file!', 403
 
 
@@ -825,7 +827,7 @@ def editContract():
     content = bleach.clean(content, tags=['h1', 'h2', 'h3',
                                           'p', 'u', 'ul', 'em',
                                           'i', 'li', 'ol', 'strong',
-                                          'ul', 'a'])
+                                          'ul', 'a', 'br'])
 
     if contractuuid not in getAvailableContractsUUID():
         return 'access denial', 400

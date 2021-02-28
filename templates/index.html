@@ -490,6 +490,7 @@
     function RenderPDF(uuid) {
         document.getElementById("back-icon").style.zIndex = "0"; //move the back-icon to background until the loading is done for better immersion.
 
+
         adobeDCView = new AdobeDC.View({
             clientId: '{{AdobeID}}',
             divId: 'adobe-view'
@@ -505,6 +506,11 @@
                 var title = responds['title']
                 currentAnnotations = {}
                 currentModified = responds['modified']
+                var currentConfig = config
+                if (responds['status'] > 1) {
+                    currentConfig.showAnnotationTools = false
+                    currentConfig.enableAnnotationAPIs = false
+                }
 
                 adobeDCView.registerCallback(
                     AdobeDC.View.Enum.CallbackType.GET_USER_PROFILE_API,
@@ -523,26 +529,28 @@
                         content: {location: {url: '/view/?contractuuid=' + uuid}},
                         metaData: {fileName: title, id: uuid},
                     }, config);
+                if (responds['data'] <= 1) {
 
-                //if any comment exists, load comments.
-                if (Object.keys(responds['data']).length > 0) {
-                    /* Use the annotation manager interface to invoke the commenting APIs*/
-                    currentAnnotations = responds['data']
-                    var annotations = $.map(currentAnnotations, function (value, key) {
-                        return value
-                    });
-                    currentPreview.then(function (adobeViewer) {
-                        adobeViewer.getAnnotationManager().then(function (annotationManager) {
-                            /* API to add annotations to PDF and return the updated PDF buffer */
-                            /* These APIs will work only when includePDFAnnotations is set to true in viewerConfig */
-                            annotationManager.addAnnotations(annotations)
-                                .then(function (result) {
-                                })
-                                .catch(function (error) {
-                                    console.log(error.message)
-                                });
+                    //if any comment exists, load comments.
+                    if (Object.keys(responds['data']).length > 0) {
+                        /* Use the annotation manager interface to invoke the commenting APIs*/
+                        currentAnnotations = responds['data']
+                        var annotations = $.map(currentAnnotations, function (value, key) {
+                            return value
                         });
-                    });
+                        currentPreview.then(function (adobeViewer) {
+                            adobeViewer.getAnnotationManager().then(function (annotationManager) {
+                                /* API to add annotations to PDF and return the updated PDF buffer */
+                                /* These APIs will work only when includePDFAnnotations is set to true in viewerConfig */
+                                annotationManager.addAnnotations(annotations)
+                                    .then(function (result) {
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error.message)
+                                    });
+                            });
+                        });
+                    }
                 }
 
                 //register callback for events to be sent to GA.

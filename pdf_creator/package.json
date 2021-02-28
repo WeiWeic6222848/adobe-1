@@ -7,6 +7,9 @@
     "@weikodei/pdf_creator": "bin/pdf_creator.js",
     "pdf_creator": "bin/pdf_creator.js"
   },
+  "scripts": {
+    "lint": "eslint ./src --fix"
+  },
   "keywords": [
     "cli",
     "pdf",
@@ -19,5 +22,10 @@
     "commander": "^5.1.0",
     "inquirer": "^7.3.2",
     "node-stream-zip": "^1.11.2"
+  },
+  "devDependencies": {
+    "eslint": "^7.21.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1"
   }
 }

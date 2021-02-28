@@ -500,6 +500,11 @@ iframe {
     .login100-form {
         width: 50%;
     }
+
+    .square {
+        width: 45%;
+        padding-bottom: 45%; /* = width for a 1:1 aspect ratio */
+    }
 }
 
 @media (max-width: 768px) {
@@ -516,19 +521,15 @@ iframe {
     }
 
     .square {
-        width: 30%;
-        padding-bottom: 30%; /* = width for a 1:1 aspect ratio */
+        width: 45%;
+        padding-bottom: 45%; /* = width for a 1:1 aspect ratio */
+        overflow: scroll;
     }
 }
 
 @media (max-width: 576px) {
     .wrap-login100 {
         padding: 70px 15px 33px 15px;
-    }
-
-    .square {
-        width: 45%;
-        padding-bottom: 45%; /* = width for a 1:1 aspect ratio */
     }
 }
 

@@ -1,7 +1,7 @@
 #ADOBE-Learn-1
 demo video link: https://youtu.be/qb2G5kMTCVQ
 
-This project is built for topcoder challenge Adobe-learning-chanllenge.
+This project is built for topcoder challenge Adobe-usecase-chanllenge.
 
 The projects folder contains the folders
 ```

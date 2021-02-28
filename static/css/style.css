@@ -70,14 +70,12 @@ input:focus, select:focus, textarea:focus {
   -ms-box-shadow: none !important; }
 
 input[type=checkbox] {
-  appearance: checkbox !important;
   -moz-appearance: checkbox !important;
   -webkit-appearance: checkbox !important;
   -o-appearance: checkbox !important;
   -ms-appearance: checkbox !important; }
 
 input[type=radio] {
-  appearance: radio !important;
   -moz-appearance: radio !important;
   -webkit-appearance: radio !important;
   -o-appearance: radio !important;

@@ -290,7 +290,7 @@
                 newformData.append('candidateList[]', pair[0].toString()) //push all selected candidates to list
             }
         }
-        if (newformData.get('candidateList[]')===null){
+        if (newformData.get('candidateList[]') === null) {
             document.getElementById('candidateList').focus();
             $('#candidateList').addClass('visible')
             return
@@ -682,9 +682,13 @@
                             }
 
                             if (serverAnnoid in localcopy) {
+                                //check all matching annotation
                                 var localAnno = localcopy[serverAnnoid]
+
+                                //delete the matched annotation in the local copy
                                 delete localcopy[serverAnnoid]
                                 if (serverAnno['modified'] > localAnno['modified']) {
+                                    // if match and modified later, update
                                     currentAnnotations[serverAnnoid] = serverAnno;
                                     annotationManager.updateAnnotation(serverAnno)
                                         .then(function (result) {
@@ -696,13 +700,14 @@
                                 }
 
                             } else {
-                                serverAnno['target']['test'] = true;
+                                //add it to adding list
                                 adding.push(serverAnno)
                             }
                         }
 
 
                         if (Object.keys(adding).length > 0) {
+                            //add annotations
                             for (var annoindex in adding) {
                                 var anno = adding[annoindex]
                                 currentAnnotations[anno['id']] = anno
@@ -716,6 +721,7 @@
                                 });
                         }
 
+                        //delete annotations which remains unmatched
                         var deleting = []
                         for (var key in localcopy) {
                             if (uploadingAnnotation !== null) {

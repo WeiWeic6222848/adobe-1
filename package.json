@@ -1,3 +1,5 @@
-"scripts": {
-  "postinstall": "cd pdf_creator && npm install"
-},
+{
+  "scripts": {
+    "postinstall": "cd pdf_creator && npm install"
+  }
+}

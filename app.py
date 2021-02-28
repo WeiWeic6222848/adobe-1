@@ -409,10 +409,6 @@ def index():
     return render_template(
         'index.html',
         contracts=contracts,
-        OAuthRequest={
-            "ID": Config["AdobeSignID"],
-            "Redirect": Config["AdobeSignRedirectUri"],
-            "Location": Config["ShardLocation"]},
         AdobeID=Config['AdobeClientID'],
         candidates=candidates,
         statusEncoding=["Unknown",

@@ -2,7 +2,7 @@ Config = {
     "AdobeClientID": "585e90823e8c4498b96236bf7e7ecf3f",
     "AdobeSignID": "CBJCHBCAABAATuR_b-G58wkm_1KPNbqnUN6nc24sRbFZ",
     "AdobeSignSecret": "LQ_AaBJlfVgV45VnvNil9mzI7lTY_2ji",
-    "DeploymentURL": "localhost:8080",
+    "DeploymentURL": "adobe-usercase.herokuapp.com",
     "ShardLocation": "eu2",
     'UpdateInterval': 1000,
     "FlaskSecret": "0QK7SG[NEfVCBsemC$%3qQ.l^*(lB2JsT(*c;npx6dzm,fz,''"

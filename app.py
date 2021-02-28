@@ -867,35 +867,6 @@ def editContract():
     contract.modified = datetime.now()
     return 'success', 200
 
-
-# region testSetup
-def testSetup():
-    userDB["qwe"] = User("qwe", "c62222848@gmail.com", 1,
-                         "testcomp", "weiwei", "123")
-    userDB["qwee"] = User("qwee", "c62222848@gmail.com", 2, "testcomp",
-                          "weiwei", "123")
-    userDB["asd"] = User("asd", "c6152848@gmail.com", 2, "testcomp",
-                         "hei hei", "123")
-    companyUsers["testcomp"] = {
-        userDB["qwe"],
-        userDB["qwee"],
-        userDB["asd"]}
-    # newContractCall("testContract", [userDB["qwee"].username],
-    #                 userDB["qwe"])
-    newContractCall("testContract2", ["qwee", "asd"],
-                    userDB["qwe"])
-
-    contract = next(iter(contractDB.values()))
-    contract.status = 5
-
-
-@app.before_first_request
-def before_first_request():
-    testSetup()
-
-
-# endregion
-
 if __name__ == '__main__':
     setup()
     context = ('server.crt', 'server.key')  # certificate and key files

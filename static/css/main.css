@@ -443,7 +443,7 @@ iframe {
     width: 21%;
     padding-bottom: 21%; /* = width for a 1:1 aspect ratio */
     margin: 1.66%;
-    overflow: hidden;
+    overflow: auto;
     border-radius: 10px;
     border: 1px gray solid;
 }
@@ -523,7 +523,6 @@ iframe {
     .square {
         width: 45%;
         padding-bottom: 45%; /* = width for a 1:1 aspect ratio */
-        overflow: scroll;
     }
 }
 

@@ -54,7 +54,7 @@
                         <div id="candidateList" class="dropdown-check-list"
                              tabindex="100">
 
-                            <span class="anchor">Select Candidates</span>
+                            <span class="anchor" id="candidateSelect">Select Candidates</span>
                             <ul class="items">
                                 {% for candidate in candidates %}
                                     <li><input type="checkbox"
@@ -289,6 +289,11 @@
             if (pair[0] !== 'contractName') {
                 newformData.append('candidateList[]', pair[0].toString()) //push all selected candidates to list
             }
+        }
+        if (newformData.get('candidateList[]')===null){
+            document.getElementById('candidateList').focus();
+            $('#candidateList').addClass('visible')
+            return
         }
 
         $.ajax({

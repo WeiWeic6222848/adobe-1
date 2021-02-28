@@ -78,7 +78,7 @@ install the requirements via
 pip3 install -r requirements.txt
 ```
 
-in the Config.py, change the Adobe-ID to your own.
+in the Config.py, change the Adobe-EmbedAPI-ID to your own.
 ```
 Config = {
 ->  "AdobeClientID": "401ce579a51d4f8382bb714dd0483ef4",
@@ -86,12 +86,12 @@ Config = {
 ```
 keep in mind it's domain restricted.
 
-Change the Application ID and secret, as well as the 'localhost' part in redirect uri to your own
+Change the Application ID and secret, as well as the url where you're going to deploy your website
 The ShardLocation can vary depending on the location of your adobe account, if you're in NA, use na1, otherwise use eu2.
 ```
     "AdobeSignID": "CBJCHBCAABAATuR_b-G58wkm..",
     "AdobeSignSecret": "LQ_AJinoPV45VnvNil9..",
-    "AdobeSignRedirectUri": "https://localhost:8080/registerOAuth/",
+    "DeploymentURL": "localhost:8080",
     "ShardLocation": "eu2",
 ```
 
@@ -116,17 +116,30 @@ python3 app.py
 ```
 
 First, if you didn't provide a accesstoken and refreshtoken, then a webbrowser page will be open requiring your account access.
+I provided my own accesstoken and refreshtoken in this case, but if you remove them, then this procedure will happen.
 After you gave access to the program (for your account). The website will be deployed under `localhost:8080` in a moment.
 
 
 ##Brief Introduction
-- Login-page is clear to itself, provide username and email.
+- Admin-email cannot be used to sign as confirmed by copilot during learn chanllenge, so please put another email inside the user field.
 
-- Admin-email cannot be used to sign as confirmed by copilot, so please put another email inside the user field.
+- Login-page is clear to itself, provide username and password.
 
-- Once you login and choosed the role, you're send to their starting page, for student it's draft page, for professor it's submitted page.
+- Register page can be reached by clicking `create your account` link on the login page under the login button
 
-- Student can press the "+" sign on draft page to upload new doc or docx to transform to pdf.
+- On the register page, if you have selected the role company, then you don't have to provide `Name` and it is invisible, if you selected the role candidate, then there will be an extra field `Name` which you need to fill in, as required.
+
+- Once you login and choosed the role, you're send to their starting page, in this page all the contract which is related to you will be shown.
+
+- contracts are sorted on the status, draft contract will be shown before finalized contracts etc..
+
+- Company can press the "+" sign on index page to initialize new contract.
+
+- If a contract is initialized with two or more candidates, at first, one contract will be created where the company user can edit the common part, then the user can press on send copy to create multiple copy for each candidate
+
+- In the common editing state, the candidate wouldn't be able to see the contract, they can only see it after the company user decided to send copies.
+
+- If a contract is initialized with one candidate
 
 - each pdf will have a view content button, student will have a edit, submit and delete for draft pdf and professor have approve and reject for submitted pdf.
 

@@ -120,9 +120,9 @@ def getAccessTokenOfAdmin():
           "scope=user_read:self+user_write:self+user_login:self+" \
           "agreement_read:account+" \
           "agreement_write:account+agreement_send:account".format(
-              Config["ShardLocation"],
-              Config["AdobeSignRedirectUri"],
-              Config["AdobeSignID"])
+        Config["ShardLocation"],
+        Config["AdobeSignRedirectUri"],
+        Config["AdobeSignID"])
     webbrowser.open(url)
 
 
@@ -138,9 +138,9 @@ def requestNewAccessToken():
                 "refresh_token={}&client_id={}" \
                 "&client_secret={}" \
                 "&redirect_uri={}&grant_type=refresh_token".format(
-                    Config['AdminRefreshToken'], Config["AdobeSignID"],
-                    Config["AdobeSignSecret"],
-                    Config["AdobeSignRedirectUri"])
+        Config['AdminRefreshToken'], Config["AdobeSignID"],
+        Config["AdobeSignSecret"],
+        Config["AdobeSignRedirectUri"])
 
     responds = requests.post(url, headers=HEADERS)
     if responds.status_code == 200:
@@ -207,7 +207,7 @@ def getSignURL(agreementID):
         'Authorization': 'Bearer ' + Config['AdminAccessToken'],
     }
     url = Config['SignAPI'] + \
-        "/api/rest/v6/agreements/{}/signingUrls".format(agreementID)
+          "/api/rest/v6/agreements/{}/signingUrls".format(agreementID)
     responds = requests.get(url, headers=headers)
     return responds.json().get(
         'signingUrlSetInfos', [
@@ -228,7 +228,7 @@ def getAgreementStatus(agreementID):
         'Authorization': 'Bearer ' + Config['AdminAccessToken'],
     }
     url = Config['SignAPI'] + \
-        "/api/rest/v6/agreements/{}".format(agreementID)
+          "/api/rest/v6/agreements/{}".format(agreementID)
     responds = requests.get(url, headers=headers)
     return responds.json().get('status', "")
 
@@ -244,7 +244,7 @@ def getSignedAgreement(agreementID):
         'Authorization': 'Bearer ' + Config['AdminAccessToken'],
     }
     url = Config['SignAPI'] + \
-        "/api/rest/v6/agreements/{}/combinedDocument/url".format(agreementID)
+          "/api/rest/v6/agreements/{}/combinedDocument/url".format(agreementID)
     responds = requests.get(url, headers=headers)
     url = responds.json().get('url', None)
     if url is not None:
@@ -404,6 +404,8 @@ def signComplete():
 @login_required
 def index():
     contracts = getAvailableContracts()
+    if len(contracts)>0:
+        contracts.sort(key=lambda x: x.status)
     candidates = companyUsers.get(current_user.company, [])
     candidates = [i for i in candidates if i.role == 2]
     return render_template(

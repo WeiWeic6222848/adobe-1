@@ -572,6 +572,7 @@
             success: function (responds) {
                 var title = responds['title']
                 var html = responds['html']
+                quill.setText('')
                 quill.clipboard.dangerouslyPasteHTML(0, html);
                 $('#editContractTitle').val(title)
                 $('#hiddenEditUUID').val(uuid)

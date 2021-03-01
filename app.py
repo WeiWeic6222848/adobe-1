@@ -367,7 +367,7 @@ def register():
             return error, 400
 
         if userDB.get(username, None):
-            error = 'That email has already been registered!'
+            error = 'That username has already been registered!'
             return error, 400
 
         # create user and add it into the db
@@ -878,28 +878,6 @@ def editContract():
     contract.htmlData = content
     contract.modified = datetime.now()
     return 'success', 200
-
-
-# region testSetup
-def testSetup():
-    userDB["qwe"] = User("qwe", "c62222848@gmail.com", 1,
-                         "testcomp", "weiwei", "123")
-    userDB["qwee"] = User("qwee", "c62222848@gmail.com", 2, "testcomp",
-                          "weiwei", "123")
-    userDB["asd"] = User("asd", "c6152848@gmail.com", 2, "testcomp",
-                         "hei hei", "123")
-    companyUsers["testcomp"] = {
-        userDB["qwe"],
-        userDB["qwee"],
-        userDB["asd"]}
-
-
-@app.before_first_request
-def before_first_request():
-    testSetup()
-
-
-# endregion
 
 if __name__ == '__main__':
     setup()
